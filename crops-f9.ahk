@@ -7,14 +7,12 @@ IsAfkActive := false
 OnExit(ReleaseKeys)
 
 F9:: {
-    global IsAfkActive
-
     if !WinExist(MINECRAFT_WIN) {
         MsgBox("Minecraft is not running.", "AFK Script", 48)
         return
     }
 
-    IsAfkActive := !IsAfkActive
+    global IsAfkActive := !IsAfkActive
 
     if IsAfkActive {
         ControlSend("{Blind}{w down}", , MINECRAFT_WIN)
