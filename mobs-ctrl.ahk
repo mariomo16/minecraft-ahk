@@ -8,7 +8,7 @@ OnExit(StopAutoClick)
 
 ~Ctrl:: {
     if !WinExist(MINECRAFT_WIN) {
-        MsgBox("Minecraft is not running.", "AutoClick", 48)
+        MsgBox("Minecraft is not running.", "AFK Script", 48)
         return
     }
 
@@ -41,7 +41,9 @@ ExecuteClick() {
 
 StopAutoClick(_exitReason?, _exitCode?) {
     global IsAutoClickActive := false
+
     SetTimer(ExecuteClick, 0)
+
     ShowTemporaryToolTip("[AutoClick] Disabled")
 }
 
