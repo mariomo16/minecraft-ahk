@@ -1,129 +1,122 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-; --- CONFIGURACIÓN DE COLORES ---
-Global activado := false
-Global ColorObjetivo := 0x036D76   ; Azul objetivo
-Global ColorProhibido1 := 0x33EBCB ; Diamante 1
-Global ColorProhibido2 := 0x65F5F0 ; NUEVO COLOR A IGNORAR
-Global Variacion := 25           
-Global Disparando := false
+global IsActive := false
+global IsShooting := false
+global TargetColor := 0x036D76
+global ExcludedColor1 := 0x33EBCB
+global ExcludedColor2 := 0x65F5F0
+global ColorVariation := 25
+global VerticalOffset := 30
+global Smoothing := 0.15
+global MaxSearchSteps := 5
+global SweepSpeed := 130
+global SweepDirection := 1
+global PixelsFromCenter := 0
+global PixelLimit := 972
 
-; --- PARÁMETROS DE MOVIMIENTO ---
-Global OffsetVertical := 30     
-Global Suavizado := 0.15        
-Global MaxPasos := 5            
-
-; --- SISTEMA DE MEMORIA RÍGIDA ---
-Global VelocidadBarrido := 130   
-Global DireccionBarrido := 1    
-Global PixelesDesdeElCentro := 0 
-Global LimitePixeles := 972     
-
-; --- TECLAS DE CONTROL DE ALTURA ---
 PgUp:: {
-    Global OffsetVertical += 5
-    ActualizarEstado("Mira más ABAJO | Offset: " . OffsetVertical)
+    global VerticalOffset += 5
+    ShowTemporaryToolTip("[Aim] Offset: " . VerticalOffset)
 }
 
 PgDn:: {
-    Global OffsetVertical -= 5
-    ActualizarEstado("Mira más ARRIBA | Offset: " . OffsetVertical)
+    global VerticalOffset -= 5
+    ShowTemporaryToolTip("[Aim] Offset: " . VerticalOffset)
 }
 
-; --- ACTIVACIÓN ---
 F5:: {
-    Global activado := !activado
-    if (activado) {
-        Global PixelesDesdeElCentro := 0 
-        ActualizarEstado("TORRETA CON DOBLE FILTRO: ON")
-        SetTimer(BucleCombate, 1) 
+    global IsActive := !IsActive
+
+    if IsActive {
+        global PixelsFromCenter := 0
+        SetTimer(CombatLoop, 1)
+        ShowTemporaryToolTip("[Turret] Enabled")
     } else {
-        PararDisparo()
-        ActualizarEstado("SISTEMA: OFF")
-        SetTimer(BucleCombate, 0)
-        SetTimer(QuitarToolTip, 2000)
+        StopShooting()
+        SetTimer(CombatLoop, 0)
+        ShowTemporaryToolTip("[Turret] Disabled")
     }
 }
 
-BucleCombate() {
-    Global activado, ColorObjetivo, ColorProhibido1, ColorProhibido2, Variacion, Disparando, OffsetVertical, Suavizado, MaxPasos
-    Global DireccionBarrido, PixelesDesdeElCentro, LimitePixeles, VelocidadBarrido
+End:: {
+    StopShooting()
+    ExitApp()
+}
 
-    if !activado
+CombatLoop() {
+    if !IsActive
         return
 
-    CX := A_ScreenWidth // 2
-    CY := A_ScreenHeight // 2
-    Encontrado := false
-    
-    Loop MaxPasos {
-        Radio := A_Index * 100 
-        if PixelSearch(&EncontradoX, &EncontradoY, CX-Radio, CY-Radio, CX+Radio, CY+Radio, ColorObjetivo, Variacion) {
-            
-            ; --- FILTRO DE EXCLUSIÓN (Busca ambos colores prohibidos) ---
-            if PixelSearch(&FakeX, &FakeY, EncontradoX-10, EncontradoY-10, EncontradoX+10, EncontradoY+10, ColorProhibido1, 20) 
-            || PixelSearch(&FakeX, &FakeY, EncontradoX-10, EncontradoY-10, EncontradoX+10, EncontradoY+10, ColorProhibido2, 20) {
-                continue ; Si encuentra cualquiera de los dos, ignora y sigue buscando
-            }
+    CenterX := A_ScreenWidth
+    CenterY := A_ScreenHeight
+    Found := false
 
-            Encontrado := true
-            break 
-        }
+    loop MaxSearchSteps {
+        SearchRadius := A_Index * 100
+
+        if !PixelSearch(&FoundX, &FoundY, CenterX - SearchRadius, CenterY - SearchRadius, CenterX + SearchRadius,
+            CenterY + SearchRadius, TargetColor, ColorVariation)
+            continue
+
+        if PixelSearch(&_, &_, FoundX - 10, FoundY - 10, FoundX + 10, FoundY + 10, ExcludedColor1, 20)
+        || PixelSearch(&_, &_, FoundX - 10, FoundY - 10, FoundX + 10, FoundY + 10, ExcludedColor2, 20)
+            continue
+
+        Found := true
+        break
     }
 
-    if Encontrado {
-        RelX := EncontradoX - CX
-        RelY := (EncontradoY + OffsetVertical) - CY
+    if Found {
+        RelX := FoundX - CenterX
+        RelY := (FoundY + VerticalOffset) - CenterY
 
-        IntentoMoverX := Round(Max(Min(RelX * Suavizado, 80), -80))
-        
-        ; Muro invisible
-        NuevaPos := PixelesDesdeElCentro + IntentoMoverX
-        if (NuevaPos > LimitePixeles) {
-            IntentoMoverX := LimitePixeles - PixelesDesdeElCentro
-            PixelesDesdeElCentro := LimitePixeles
-        } else if (NuevaPos < -LimitePixeles) {
-            IntentoMoverX := -LimitePixeles - PixelesDesdeElCentro
-            PixelesDesdeElCentro := -LimitePixeles
+        MoveX := Round(Max(Min(RelX * Smoothing, 80), -80))
+        NextPos := PixelsFromCenter + MoveX
+
+        if NextPos > PixelLimit {
+            MoveX := PixelLimit - PixelsFromCenter
+            global PixelsFromCenter := PixelLimit
+        } else if NextPos < -PixelLimit {
+            MoveX := -PixelLimit - PixelsFromCenter
+            global PixelsFromCenter := -PixelLimit
         } else {
-            PixelesDesdeElCentro += IntentoMoverX
+            global PixelsFromCenter += MoveX
         }
 
-        DllCall("mouse_event", "UInt", 0x0001, "Int", IntentoMoverX, "Int", Round(RelY * Suavizado), "UInt", 0, "UPtr", 0)
+        DllCall("mouse_event", "UInt", 0x0001, "Int", MoveX, "Int", Round(RelY * Smoothing), "UInt", 0, "UPtr", 0)
 
-        if !Disparando {
+        if !IsShooting {
             Click("Right Down")
-            Global Disparando := true
+            global IsShooting := true
         }
     } else {
-        PararDisparo()
-        
-        ; Barrido ultra rápido
-        MovimientoBarrido := VelocidadBarrido * DireccionBarrido
-        ProximaPos := PixelesDesdeElCentro + MovimientoBarrido
-        
-        if (ProximaPos >= LimitePixeles) {
-            DireccionBarrido := -1
-            MovimientoBarrido := LimitePixeles - PixelesDesdeElCentro
-        } else if (ProximaPos <= -LimitePixeles) {
-            DireccionBarrido := 1
-            MovimientoBarrido := -LimitePixeles - PixelesDesdeElCentro
+        StopShooting()
+
+        SweepMove := SweepSpeed * SweepDirection
+        NextPos := PixelsFromCenter + SweepMove
+
+        if NextPos >= PixelLimit {
+            global SweepDirection := -1
+            SweepMove := PixelLimit - PixelsFromCenter
+        } else if NextPos <= -PixelLimit {
+            global SweepDirection := 1
+            SweepMove := -PixelLimit - PixelsFromCenter
         }
 
-        PixelesDesdeElCentro += MovimientoBarrido
-        DllCall("mouse_event", "UInt", 0x0001, "Int", MovimientoBarrido, "Int", 0, "UInt", 0, "UPtr", 0)
+        global PixelsFromCenter += SweepMove
+        DllCall("mouse_event", "UInt", 0x0001, "Int", SweepMove, "Int", 0, "UInt", 0, "UPtr", 0)
     }
 }
 
-PararDisparo() {
-    Global Disparando
-    if (Disparando) {
+StopShooting() {
+    if IsShooting {
         Click("Right Up")
-        Global Disparando := false
+        global IsShooting := false
     }
 }
 
-ActualizarEstado(Texto) => (ToolTip(Texto), SetTimer(QuitarToolTip, 3000))
-QuitarToolTip() => (ToolTip(), SetTimer(QuitarToolTip, 0))
-End::ExitApp
+ShowTemporaryToolTip(Text, Duration := 2000) {
+    ToolTip(Text)
+    SetTimer(() => ToolTip(), -Duration)
+}
