@@ -39,7 +39,7 @@ ExecuteAfkActions() {
         return
     }
 
-    ControlClick("", MINECRAFT_WIN, , "Right", 1, "NA")
+    ControlClick(, MINECRAFT_WIN, , "Right", 1, "NA")
 }
 
 StopAfk() {
@@ -49,14 +49,14 @@ StopAfk() {
     SetTimer(ExecuteAfkActions, 0)
 
     if WinExist(MINECRAFT_WIN)
-        ControlSend("{Blind}{w up}", "", MINECRAFT_WIN)
+        ControlSend("{Blind}{w up}", , MINECRAFT_WIN)
 
     ShowTemporaryToolTip("[AFK] Disabled")
 }
 
 ReleaseKeys(_exitReason, _exitCode) {
     if WinExist(MINECRAFT_WIN)
-        ControlSend("{Blind}{w up}", "", MINECRAFT_WIN)
+        ControlSend("{Blind}{w up}", , MINECRAFT_WIN)
 }
 
 ShowTemporaryToolTip(Text, Duration := 2000) {
