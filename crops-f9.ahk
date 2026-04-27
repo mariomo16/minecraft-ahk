@@ -41,8 +41,7 @@ ExecuteAfkActions() {
 }
 
 StopAfk() {
-    global IsAfkActive
-    IsAfkActive := false
+    global IsAfkActive := false
 
     SetTimer(ExecuteAfkActions, 0)
 
