@@ -1,38 +1,46 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
-SetControlDelay -1 ; Mejora la fiabilidad de los clics en segundo plano
+SetControlDelay(-1)
 
-Global activado := false
-ID_Minecraft := "ahk_exe javaw.exe"
+MINECRAFT_WIN := "ahk_exe javaw.exe"
+IsAfkActive := false
+
+OnExit(StopAfk)
 
 F7:: {
-    Global activado := !activado
+    if !WinExist(MINECRAFT_WIN) {
+        MsgBox("Minecraft is not running.", "Herbalism Script", 48)
+        return
+    }
 
-    if (activado) {
-        if WinExist(ID_Minecraft) {
-            ToolTip("AFK INICIADO (Modo Segundo Plano)")
-            ; Usamos 'NA' para que no necesite que la ventana esté activa
-            ControlClick(, ID_Minecraft, , "Left", , "D NA")
-            ControlSend("{d down}", , ID_Minecraft)
-        } else {
-            MsgBox("Minecraft no detectado.")
-            activado := false
-        }
+    global IsAfkActive := !IsAfkActive
+
+    if IsAfkActive {
+        ControlClick(, MINECRAFT_WIN, , "Left", 1, "D NA")
+        ControlSend("{Blind}{d down}", , MINECRAFT_WIN)
+        ShowTemporaryToolTip("[AFK] Enabled")
     } else {
-        DetenerTodo()
+        StopAfk()
     }
-
-    SetTimer(() => ToolTip(), -2000)
 }
 
-DetenerTodo() {
-    Global activado := false
-    if WinExist(ID_Minecraft) {
-        ControlClick(, ID_Minecraft, , "Left", , "U NA")
-        ControlSend("{d up}", , ID_Minecraft)
-    }
-    ToolTip("AFK: APAGADO")
-    SetTimer(() => ToolTip(), -2000)
+End:: {
+    StopAfk()
+    ExitApp()
 }
 
-End::ExitApp()
+StopAfk(_exitReason?, _exitCode?) {
+    global IsAfkActive := false
+
+    if WinExist(MINECRAFT_WIN) {
+        ControlClick(, MINECRAFT_WIN, , "Left", 1, "U NA")
+        ControlSend("{Blind}{d up}", , MINECRAFT_WIN)
+    }
+
+    ShowTemporaryToolTip("[AFK] Disabled")
+}
+
+ShowTemporaryToolTip(Text, Duration := 2000) {
+    ToolTip(Text)
+    SetTimer(() => ToolTip(), -Duration)
+}
