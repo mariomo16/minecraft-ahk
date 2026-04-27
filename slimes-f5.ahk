@@ -15,6 +15,8 @@ global SweepDirection := 1
 global PixelsFromCenter := 0
 global PixelLimit := 972
 
+OnExit((*) => StopShooting())
+
 PgUp:: {
     global VerticalOffset += 5
     ShowTemporaryToolTip("[Aim] Offset: " . VerticalOffset)
