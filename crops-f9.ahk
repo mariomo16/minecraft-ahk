@@ -51,7 +51,7 @@ StopAfk() {
     ShowTemporaryToolTip("[AFK] Disabled")
 }
 
-ReleaseKeys(_exitReason, _exitCode) {
+ReleaseKeys(_exitReason?, _exitCode?) {
     if WinExist(MINECRAFT_WIN)
         ControlSend("{Blind}{w up}", , MINECRAFT_WIN)
 }
