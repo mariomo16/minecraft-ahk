@@ -8,7 +8,7 @@ OnExit(ReleaseKeys)
 
 F9:: {
     if !WinExist(MINECRAFT_WIN) {
-        MsgBox("Minecraft is not running.", "AFK Script", 48)
+        MsgBox("Minecraft is not running.", "Crops Script", 48)
         return
     }
 
@@ -17,7 +17,7 @@ F9:: {
     if IsAfkActive {
         ControlSend("{Blind}{w down}", , MINECRAFT_WIN)
         SetTimer(ExecuteAfkActions, 80)
-        ShowTemporaryToolTip("[AFK] Enabled")
+        ShowTemporaryToolTip("[Crops] Enabled")
     } else {
         StopAfk()
     }
@@ -48,7 +48,7 @@ StopAfk() {
     if WinExist(MINECRAFT_WIN)
         ControlSend("{Blind}{w up}", , MINECRAFT_WIN)
 
-    ShowTemporaryToolTip("[AFK] Disabled")
+    ShowTemporaryToolTip("[Crops] Disabled")
 }
 
 ReleaseKeys(_exitReason?, _exitCode?) {

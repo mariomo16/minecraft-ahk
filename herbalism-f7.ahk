@@ -18,7 +18,7 @@ F7:: {
     if IsAfkActive {
         ControlClick(, MINECRAFT_WIN, , "Left", 1, "D NA")
         ControlSend("{Blind}{d down}", , MINECRAFT_WIN)
-        ShowTemporaryToolTip("[AFK] Enabled")
+        ShowTemporaryToolTip("[Herbalism] Enabled")
     } else {
         StopAfk()
     }
@@ -37,7 +37,7 @@ StopAfk(_exitReason?, _exitCode?) {
         ControlSend("{Blind}{d up}", , MINECRAFT_WIN)
     }
 
-    ShowTemporaryToolTip("[AFK] Disabled")
+    ShowTemporaryToolTip("[Herbalism] Disabled")
 }
 
 ShowTemporaryToolTip(Text, Duration := 2000) {

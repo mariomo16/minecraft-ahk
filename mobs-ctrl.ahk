@@ -8,7 +8,7 @@ OnExit(StopAutoClick)
 
 ~Ctrl:: {
     if !WinExist(MINECRAFT_WIN) {
-        MsgBox("Minecraft is not running.", "AFK Script", 48)
+        MsgBox("Minecraft is not running.", "Monsters Script", 48)
         return
     }
 
@@ -16,7 +16,7 @@ OnExit(StopAutoClick)
 
     if IsAutoClickActive {
         SetTimer(ExecuteClick, 100)
-        ShowTemporaryToolTip("[AutoClick] Enabled")
+        ShowTemporaryToolTip("[Monsters] Enabled")
     } else {
         StopAutoClick()
     }
@@ -44,7 +44,7 @@ StopAutoClick(_exitReason?, _exitCode?) {
 
     SetTimer(ExecuteClick, 0)
 
-    ShowTemporaryToolTip("[AutoClick] Disabled")
+    ShowTemporaryToolTip("[Monsters] Disabled")
 }
 
 ShowTemporaryToolTip(Text, Duration := 2000) {

@@ -8,7 +8,7 @@ OnExit(StopBow)
 
 F7:: {
     if !WinExist(MINECRAFT_WIN) {
-        MsgBox("Minecraft is not running.", "Bow Script", 40)
+        MsgBox("Minecraft is not running.", "Bows Script", 40)
         return
     }
 
@@ -16,7 +16,7 @@ F7:: {
 
     if IsBowActive {
         SetTimer(BowCycle, 10)
-        ShowTemporaryToolTip("[Bow] Enabled")
+        ShowTemporaryToolTip("[Bows] Enabled")
     } else {
         StopBow
     }
@@ -50,7 +50,7 @@ StopBow(_exitReason?, _exitCode?) {
 
     PostMessage(0x0205, 0, 0, , MINECRAFT_WIN)
 
-    ShowTemporaryToolTip("[Bow] Disabled")
+    ShowTemporaryToolTip("[Bows] Disabled")
 }
 
 ShowTemporaryToolTip(Text, Duration := 2000) {

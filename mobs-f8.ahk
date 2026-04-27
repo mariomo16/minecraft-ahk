@@ -8,7 +8,7 @@ OnExit(StopAutoClick)
 
 F8:: {
     if !WinExist(MINECRAFT_WIN) {
-        MsgBox("Minecraft is not running.", "AFK Script", 48)
+        MsgBox("Minecraft is not running.", "Mobs Script", 48)
         return
     }
 
@@ -16,7 +16,7 @@ F8:: {
 
     if IsAutoClickActive {
         SetTimer(ExecuteClick, 100)
-        ShowTemporaryToolTip("[AutoClick] Enabled")
+        ShowTemporaryToolTip("[Mobs] Enabled")
     } else {
         StopAutoClick()
     }
@@ -44,7 +44,7 @@ StopAutoClick(_exitReason?, _exitCode?) {
 
     SetTimer(ExecuteClick, 0)
 
-    ShowTemporaryToolTip("[AutoClick] Disabled")
+    ShowTemporaryToolTip("[Mobs] Disabled")
 }
 
 ShowTemporaryToolTip(Text, Duration := 2000) {
