@@ -17,7 +17,7 @@ F9:: {
     IsAfkActive := !IsAfkActive
 
     if IsAfkActive {
-        ControlSend("{Blind}{w down}", "", MINECRAFT_WIN)
+        ControlSend("{Blind}{w down}", , MINECRAFT_WIN)
         SetTimer(ExecuteAfkActions, 80)
         ShowTemporaryToolTip("[AFK] Enabled")
     } else {
